@@ -134,6 +134,12 @@ export async function createApp(
     },
   }));
   app.use(httpLogger);
+  // Minimal liveness probe for platform health checks (e.g. Render), which
+  // arrive with an internal Host header. Exposes no data, so it sits ahead of
+  // the private hostname guard.
+  app.get("/healthz", (_req, res) => {
+    res.status(200).json({ status: "ok" });
+  });
   const privateHostnameGateEnabled = shouldEnablePrivateHostnameGuard({
     deploymentMode: opts.deploymentMode,
     deploymentExposure: opts.deploymentExposure,
